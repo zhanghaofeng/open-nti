@@ -550,7 +550,9 @@ def collector(**kwargs):
                 # By default execute show version in order to get version and platform as default tags for all kpi related to this host
                 kpi_tags = {}
                 target_command = 'show version | display xml'
-                version_xpath = "//package-information/comment"
+                # Modify this version_path for EVO platforms.
+                version_xpath = "//junos-version"
+                #version_xpath = "//package-information/comment"
                 product_model_xpath = "//product-model"
                 logger.info('[%s]: Executing command: %s', host, target_command)
                 result = execute_command(jdev,target_command)
@@ -570,10 +572,14 @@ def collector(**kwargs):
 
                     if use_hostname:
                         hostname_xpth = "//host-name"
-                        hostname_tmp = xml_data.xpath(hostname_xpth)[0].text.strip()
-                        hostname = convert_variable_type(hostname_tmp)
-                        logger.info('[%s]: Host will now be referenced as : %s', host, hostname)
-                        host = hostname
+                        try:
+                            hostname_tmp = xml_data.xpath(hostname_xpth)[0].text.strip()
+                            hostname = convert_variable_type(hostname_tmp)
+                            logger.info('[%s]: Host will now be referenced as : %s', host, hostname)
+                            host = hostname
+                        except:
+                            logger.info('Cannot determine hostname as: %s', host)
+                            pass
 #                        if (db_schema == 1):
 #                            latest_datapoints = get_latest_datapoints(host=host)
 #                            logger.info("Latest Datapoints are:")
